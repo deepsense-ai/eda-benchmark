@@ -13,6 +13,18 @@ REPORT ?= 1
 JOB_NAME ?=
 EXTRA ?=
 
+# Harness networking belongs to the runner, not individual tasks. Agent setup uses
+# the environment baseline; agent.run() then switches to the provider-only policy.
+HARNESS_SETUP_HOSTS := deb.debian.org downloads.claude.ai nodejs.org raw.githubusercontent.com registry.npmjs.org
+AGENT_RUNTIME_HOSTS_claude-code := api.anthropic.com
+AGENT_RUNTIME_HOSTS_codex := api.openai.com
+AGENT_RUNTIME_HOSTS_gemini-cli := generativelanguage.googleapis.com
+AGENT_RUNTIME_HOSTS_opencode := api.deepseek.com
+AGENT_RUNTIME_HOSTS = $(AGENT_RUNTIME_HOSTS_$(AGENT))
+RUN_NETWORK_FLAGS = \
+	$(foreach host,$(HARNESS_SETUP_HOSTS),--allow-environment-host $(host)) \
+	$(foreach host,$(AGENT_RUNTIME_HOSTS),--allow-agent-host $(host))
+
 help:
 	@printf '%s\n' \
 		'Supported targets:' \
@@ -74,7 +86,7 @@ run: require-task
 	set -e; \
 	job_name="$(JOB_NAME)"; \
 	if [ -z "$$job_name" ]; then job_name="run-$(TASK)-$$(date +%Y%m%d-%H%M%S)"; fi; \
-	$(HARBOR) run -p $(TASK_PATH) -m $(MODEL) -a $(AGENT) --env-file $(ENV_FILE) --jobs-dir $(RESULTS_DIR) --job-name "$$job_name" -k 1 -n 1 $(EXTRA); \
+	$(HARBOR) run -p $(TASK_PATH) -m $(MODEL) -a $(AGENT) --env-file $(ENV_FILE) --jobs-dir $(RESULTS_DIR) --job-name "$$job_name" -k 1 -n 1 $(RUN_NETWORK_FLAGS) $(EXTRA); \
 	if [ "$(REPORT)" != "0" ]; then uv run --project harbor python harbor/job_report.py "$(RESULTS_DIR)/$$job_name"; fi
 
 # Run every agent/model entry from BENCHMARK_CONFIG on one task.
