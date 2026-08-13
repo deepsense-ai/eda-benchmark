@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs in a separate verifier container (python:3.11-slim, no network).
+# Runs in a separate verifier container (python:3.13-slim, no network).
 # Harbor re-materializes the /app/answer.json artifact from the agent
 # container at the same path before this script runs.
 
