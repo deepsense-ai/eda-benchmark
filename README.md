@@ -330,6 +330,14 @@ To open the results viewer, run `make ui` then click the link to local server th
 | `make run-benchmark-all-tasks`                                            | Runs the benchmark configuration across all valid problems in `tasks/`. |
 | `make ui`                                                                 | Opens the Harbor results viewer for `results/`. |
 
+---
+
+## FAQ
+
+### Can subagents look ahead in round-based simulations?
+
+No. The simulator advances only after the main agent submits its current-round decision, so subagents cannot access future-round information. They can parallelize analysis of the current state, but cannot bypass this sequential decision boundary.
+
 
 ---
 
