@@ -14,7 +14,7 @@ runs it before finishing so both files exist.
 
 `/app/answer.json` is declared as a task artifact, so Harbor copies it into a
 **separate verifier container** (built from `tests/Dockerfile`,
-`python:3.11-slim`, no network) at the same path — the ground truth and
+`python:3.13-slim`, no network) at the same path — the ground truth and
 scoring code in `tests/` never enter the agent's environment.
 
 - `tests/test.sh` — verifier entry point: runs `tests/score.py` and writes
@@ -42,7 +42,7 @@ executes it — mirroring exactly what an agent is asked to do.
 ├── instruction.md            # Agent prompt
 ├── task.toml                 # Timeouts, artifacts, separate verifier env
 ├── environment/
-│   ├── Dockerfile            # python:3.11-slim + pandas/numpy/scipy/scikit-learn
+│   ├── Dockerfile            # python:3.13-slim + pandas/numpy/scipy/scikit-learn
 │   └── dataset/              # Task data, baked into the agent image at /app/dataset/
 ├── solution/
 │   ├── solve.sh              # Oracle: run solve.py, then /app/answer.py

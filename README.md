@@ -278,6 +278,27 @@ EDA Benchmark uses [Harbor](https://github.com/harbor-framework/harbor) as the f
 - Docker
 - API keys for the model providers you want to evaluate
 
+### Network access for harness setup
+
+Harbor installs the selected agent harness inside the task environment before
+the agent starts. Environments using an egress allowlist must permit the setup
+hosts required by that harness:
+
+| Host | Harnesses | What is downloaded |
+|---|---|---|
+| `deb.debian.org` | Claude Code, Codex, Gemini CLI, OpenCode | Debian package indexes and utilities such as `curl`, `ripgrep`, and `procps`. |
+| `downloads.claude.ai` | Claude Code on Debian-based images | The Claude Code bootstrap script and release. |
+| `raw.githubusercontent.com` | Codex, Gemini CLI, OpenCode | The NVM installation script. |
+| `nodejs.org` | Codex, Gemini CLI, OpenCode | Node.js binaries installed by NVM. |
+| `registry.npmjs.org` | Codex, Gemini CLI, OpenCode; Claude Code on Alpine | The corresponding agent CLI npm package and dependencies. |
+
+These are installation dependencies, not general agent browsing permissions.
+When phase-specific network policies are available, allow these hosts only for
+environment setup, then restrict `agent.run()` to the selected model provider's
+API host. Keep verification offline unless a verifier explicitly requires
+network access. Recheck this table when upgrading Harbor because its harness
+installers may change.
+
 ### Quick start
 
 Initialize the environment:
