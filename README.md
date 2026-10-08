@@ -239,7 +239,7 @@ Example configuration:
       reasoning_effort: xhigh
 
   - model_name: google/gemini-3.1-pro-preview
-    name: antigravity-cli
+    name: gemini-cli
     kwargs:
       reasoning_effort: high
 
@@ -312,9 +312,9 @@ make run-benchmark TASK=air-quality-audit
 
 ### Through a LiteLLM proxy
 
-`claude-code`, `codex` and `antigravity-cli` can reach all models through one
+`claude-code`, `codex`, `gemini-cli` and `antigravity-cli` can reach their models through one
 [LiteLLM proxy](https://docs.litellm.ai/docs/simple_proxy) instead of separate provider keys.
-Put the virtual key and the proxy address (without `/v1`) in `harbor/.env`:
+Put the virtual key and the proxy address in `harbor/.env` (of the provider keys only `DEEPSEEK_API_KEY` is then used, by `opencode`):
 
 ```text
 LITELLM_API_KEY=sk-...
@@ -323,7 +323,7 @@ LITELLM_PROXY_URL=https://litellm.example.com
 
 Then add `LITELLM=1` to `make run`, `make run-benchmark` or `make run-benchmark-all-tasks`.
 Model names are the proxy ones (`GET <proxy>/v1/models`); `claude-code` takes them without the
-provider prefix, and the benchmark switches to
+provider prefix, because with a custom base URL Harbor passes the name on as is. The benchmark switches to
 [`harbor/model-benchmark-litellm.yaml`](./harbor/model-benchmark-litellm.yaml):
 
 ```bash
@@ -354,8 +354,6 @@ To open the results viewer, run `make ui` then click the link to local server th
 | `make run-benchmark TASK=air-quality-audit`                               | Runs every model entry from `harbor/model-benchmark.yaml` on one problem. |
 | `make run-benchmark-all-tasks`                                            | Runs the benchmark configuration across all valid problems in `tasks/`. |
 | `make ui`                                                                 | Opens the Harbor results viewer for `results/`. |
-
-Add `LITELLM=1` to the run commands to go through a LiteLLM proxy (see above); `make help` lists all variables.
 
 
 ---
