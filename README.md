@@ -239,7 +239,7 @@ Example configuration:
       reasoning_effort: xhigh
 
   - model_name: google/gemini-3.1-pro-preview
-    name: gemini-cli
+    name: antigravity-cli
     kwargs:
       reasoning_effort: high
 
@@ -310,6 +310,31 @@ Run a full benchmark for one task:
 make run-benchmark TASK=air-quality-audit
 ```
 
+### Through a LiteLLM proxy
+
+`claude-code`, `codex` and `antigravity-cli` can reach all models through one
+[LiteLLM proxy](https://docs.litellm.ai/docs/simple_proxy) instead of separate provider keys.
+Put the virtual key and the proxy address (without `/v1`) in `harbor/.env`:
+
+```text
+LITELLM_API_KEY=sk-...
+LITELLM_PROXY_URL=https://litellm.example.com
+```
+
+Then add `LITELLM=1` to `make run`, `make run-benchmark` or `make run-benchmark-all-tasks`.
+Model names are the proxy ones (`GET <proxy>/v1/models`); `claude-code` takes them without the
+provider prefix, and the benchmark switches to
+[`harbor/model-benchmark-litellm.yaml`](./harbor/model-benchmark-litellm.yaml):
+
+```bash
+make run TASK=air-quality-audit LITELLM=1 AGENT=claude-code MODEL=claude-sonnet-5-5
+make run TASK=air-quality-audit LITELLM=1 AGENT=codex MODEL=openai/gpt-5.5
+make run TASK=air-quality-audit LITELLM=1 AGENT=antigravity-cli MODEL=google/gemini-3.8-flash EXTRA='--ak reasoning_effort=high'
+make run-benchmark TASK=air-quality-audit LITELLM=1
+```
+
+### Results viewer
+
 To open the results viewer, run `make ui` then click the link to local server that will be given.
 
 <div align="center">
@@ -329,6 +354,8 @@ To open the results viewer, run `make ui` then click the link to local server th
 | `make run-benchmark TASK=air-quality-audit`                               | Runs every model entry from `harbor/model-benchmark.yaml` on one problem. |
 | `make run-benchmark-all-tasks`                                            | Runs the benchmark configuration across all valid problems in `tasks/`. |
 | `make ui`                                                                 | Opens the Harbor results viewer for `results/`. |
+
+Add `LITELLM=1` to the run commands to go through a LiteLLM proxy (see above); `make help` lists all variables.
 
 
 ---
