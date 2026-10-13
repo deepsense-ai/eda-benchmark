@@ -42,7 +42,7 @@ executes it — mirroring exactly what an agent is asked to do.
 ├── instruction.md            # Agent prompt
 ├── task.toml                 # Timeouts, artifacts, separate verifier env
 ├── environment/
-│   ├── Dockerfile            # python:3.11-slim + pandas/numpy/scipy/scikit-learn
+│   ├── Dockerfile            # FROM eda-benchmark-base (harbor/base-image): Python stack + agent CLIs
 │   └── dataset/              # Task data, baked into the agent image at /app/dataset/
 ├── solution/
 │   ├── solve.sh              # Oracle: run solve.py, then /app/answer.py

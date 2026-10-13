@@ -1,10 +1,15 @@
-.PHONY: help init env test run run-benchmark run-benchmark-all-tasks ui require-task require-litellm
+.PHONY: help init base-image env test run run-benchmark run-benchmark-all-tasks ui require-task require-litellm
 
-HARBOR := uv run --project harbor harbor
+# harbor/ on PYTHONPATH makes harbor/eda_agents.py importable as `eda_agents:<Class>` agents.
+HARBOR := PYTHONPATH=$(CURDIR)/harbor uv run --project harbor harbor
+# Every task Dockerfile starts FROM this image; keep the tag in sync with them.
+BASE_IMAGE ?= eda-benchmark-base:latest
 TASK_PATH = tasks/$(TASK)
 
 MODEL ?= openai/gpt-5.5
 AGENT ?= opencode
+# Harbor's antigravity-cli installer fails once agy is in the base image; see harbor/eda_agents.py.
+HARBOR_AGENT = $(if $(filter antigravity-cli,$(AGENT)),eda_agents:AntigravityCli,$(AGENT))
 # Important to pass .env, otherwise agents won't be connecting to providers, and it won't be easily seen in logs.
 ENV_FILE ?= harbor/.env
 RESULTS_DIR ?= results
@@ -32,6 +37,8 @@ help:
 		'Supported targets:' \
 		'  make init' \
 		'      Sync Harbor dependencies and create harbor/.env from harbor/.env.template if missing.' \
+		'  make base-image' \
+		'      Build the shared task base image (Python stack + agent CLIs); env/test/run* build it automatically.' \
 		'  make env TASK=sales_representatives' \
 		'      Start an interactive Docker environment for one task.' \
 		'  make test TASK=sales_representatives' \
@@ -66,6 +73,10 @@ init:
 	uv sync --project harbor
 	test -f $(ENV_FILE) || cp harbor/.env.template $(ENV_FILE)
 
+# Build the shared task base image (Python stack + agent CLIs). Cached, so cheap to rerun.
+base-image:
+	docker build -t $(BASE_IMAGE) harbor/base-image
+
 # Shared guard for commands that operate on a single task directory.
 require-task:
 	@if [ -z "$(TASK)" ]; then \
@@ -90,11 +101,11 @@ ifeq ($(LITELLM),1)
 endif
 
 # Open an interactive Docker environment with task files, solution, and tests mounted.
-env: require-task
+env: require-task base-image
 	$(HARBOR) task start-env -p $(TASK_PATH) -e docker -a -i $(EXTRA)
 
 # Run the task's reference solution through Harbor's oracle agent.
-test: require-task
+test: require-task base-image
 	$(HARBOR) run -p $(TASK_PATH) -a oracle --debug --env-file $(ENV_FILE) -o $(RESULTS_DIR) -k 1 -n 1 $(EXTRA)
 
 # $(1): job name prefix used when JOB_NAME is empty, $(2): job-specific Harbor run arguments.
@@ -107,15 +118,15 @@ define harbor_job
 endef
 
 # Run one model/agent pair on one task.
-run: require-task require-litellm
-	$(call harbor_job,run-$(TASK),-p $(TASK_PATH) -m $(MODEL) -a $(AGENT) -k 1 -n 1)
+run: require-task require-litellm base-image
+	$(call harbor_job,run-$(TASK),-p $(TASK_PATH) -m $(MODEL) -a $(HARBOR_AGENT) -k 1 -n 1)
 
 # Run every agent/model entry from BENCHMARK_CONFIG on one task.
-run-benchmark: require-task require-litellm
+run-benchmark: require-task require-litellm base-image
 	$(call harbor_job,benchmark-$(TASK),-c $(BENCHMARK_CONFIG) -p $(TASK_PATH))
 
 # Run every agent/model entry from BENCHMARK_CONFIG across all valid tasks.
-run-benchmark-all-tasks: require-litellm
+run-benchmark-all-tasks: require-litellm base-image
 	$(call harbor_job,benchmark-all-tasks,-c $(BENCHMARK_CONFIG) -p tasks)
 
 # Browse Harbor job results in the local web UI.

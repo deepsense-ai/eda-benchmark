@@ -239,14 +239,12 @@ Example configuration:
       reasoning_effort: xhigh
 
   - model_name: google/gemini-3.1-pro-preview
-    name: gemini-cli
+    name: antigravity-cli
     kwargs:
       reasoning_effort: high
 
-  - model_name: deepseek/deepseek-reasoner
+  - model_name: deepseek/deepseek-flash
     name: opencode
-    kwargs:
-      reasoning_effort: high
 
 
 ```
@@ -314,7 +312,7 @@ make run-benchmark TASK=air-quality-audit
 
 `claude-code`, `codex`, `gemini-cli` and `antigravity-cli` can reach their models through one
 [LiteLLM proxy](https://docs.litellm.ai/docs/simple_proxy) instead of separate provider keys.
-Put the virtual key and the proxy address in `harbor/.env` (of the provider keys only `DEEPSEEK_API_KEY` is then used, by `opencode`):
+Put the virtual key and the proxy address in `harbor/.env` (the provider keys are then not used):
 
 ```text
 LITELLM_API_KEY=sk-...
@@ -333,6 +331,24 @@ make run TASK=air-quality-audit LITELLM=1 AGENT=antigravity-cli MODEL=google/gem
 make run-benchmark TASK=air-quality-audit LITELLM=1
 ```
 
+### Base image
+
+Every task image starts `FROM eda-benchmark-base:latest`, built from
+[`harbor/base-image/Dockerfile`](./harbor/base-image/Dockerfile) by `make base-image`
+(`env`, `test` and `run*` build it automatically; Docker's cache makes that cheap).
+It holds the Python data stack and the agent toolchain: Node 22 via nvm, `curl`, `ripgrep`,
+`procps`, and pinned `codex`, `claude-code`, `opencode` and `antigravity-cli`.
+Otherwise Harbor installs all of this in every trial, under a 360-second setup limit,
+which under `n_concurrent_trials: 10` sometimes ran out.
+
+The CLI versions are pinned in two places that must agree: the `ARG`s in the base
+Dockerfile and `version` in `harbor/model-benchmark*.yaml`. With matching versions
+`codex` and `claude-code` skip installation and `opencode` reinstalls from the npm cache.
+`antigravity-cli` runs as `eda_agents:AntigravityCli` ([`harbor/eda_agents.py`](./harbor/eda_agents.py);
+`make run AGENT=antigravity-cli` maps to it), because Harbor's own installer fails when `agy`
+is already present; its auto-update is disabled in the image.
+To upgrade, change both and rerun `make base-image`.
+
 ### Results viewer
 
 To open the results viewer, run `make ui` then click the link to local server that will be given.
@@ -348,6 +364,7 @@ To open the results viewer, run `make ui` then click the link to local server th
 | Command                                                                   | Description |
 |---------------------------------------------------------------------------|---|
 | `make init`                                                               | Installs Harbor dependencies and creates `harbor/.env` from the template if it does not exist. |
+| `make base-image`                                                         | Builds the shared task base image (Python stack + agent CLIs). |
 | `make env TASK=air-quality-audit`                                         | Opens an interactive Docker environment for a problem. |
 | `make test TASK=air-quality-audit`                                        | Runs the problem with the oracle agent using one attempt and executes the reference solution. |
 | `make run TASK=air-quality-audit MODEL=openai/gpt-5.5 AGENT=opencode`     | Runs one model and agent on one problem using one attempt, then appends a report to `results.csv`. |

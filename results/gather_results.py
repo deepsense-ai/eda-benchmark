@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OPENCODE_ALLOWED_MODELS = ["deepseek-reasoner"]
+OPENCODE_ALLOWED_MODELS = ["deepseek-reasoner", "deepseek-flash"]
 
 
 def load_results() -> pd.DataFrame:
