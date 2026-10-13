@@ -34,9 +34,9 @@ RUN . "$NVM_DIR/nvm.sh" \
  && npm install -g opencode-ai@"$OPENCODE_VERSION"
 RUN curl -fsSL https://downloads.claude.ai/claude-code-releases/bootstrap.sh | bash -s -- "$CLAUDE_CODE_VERSION"
 
-# antigravity-cli: run through eda_agents:AntigravityCli (harbor/eda_agents.py), which skips
-# Harbor's installer when ~/.local/bin/agy exists. Auto-update is off so every trial uses this
-# pinned build, from
+# antigravity-cli: Harbor's `curl install.sh | bash` fails under pipefail when agy already exists,
+# so `make base-image` copies this binary to harbor/.cache/agy and Harbor uploads it via
+# binary_path. Auto-update is off so every trial uses this pinned build, from
 # https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/manifests/linux_amd64.json
 ENV AGY_CLI_DISABLE_AUTO_UPDATE=1
 ARG AGY_URL=https://storage.googleapis.com/antigravity-public/antigravity-cli/1.3.4-5524158944247808/linux-x64/cli_linux_x64.tar.gz

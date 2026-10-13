@@ -122,14 +122,10 @@ def _extract_agent_info_metadata(agent_info: dict) -> tuple[str, str, str]:
 
 def _extract_trial_agent_metadata(trial_result: dict) -> tuple[str, str, str]:
     config_agent = (trial_result.get("config") or {}).get("agent")
-    agent_info = trial_result.get("agent_info")
     if isinstance(config_agent, dict):
-        model_name, agent_name, reasoning_effort = _extract_config_agent_metadata(config_agent)
-        # `module:Class` agents (harbor/eda_agents.py) report under their Harbor name.
-        if ":" in agent_name and isinstance(agent_info, dict) and agent_info.get("name"):
-            agent_name = str(agent_info["name"])
-        return model_name, agent_name, reasoning_effort
+        return _extract_config_agent_metadata(config_agent)
 
+    agent_info = trial_result.get("agent_info")
     if isinstance(agent_info, dict):
         return _extract_agent_info_metadata(agent_info)
 

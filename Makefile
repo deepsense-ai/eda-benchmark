@@ -1,15 +1,16 @@
 .PHONY: help init base-image env test run run-benchmark run-benchmark-all-tasks ui require-task require-litellm
 
-# harbor/ on PYTHONPATH makes harbor/eda_agents.py importable as `eda_agents:<Class>` agents.
-HARBOR := PYTHONPATH=$(CURDIR)/harbor uv run --project harbor harbor
+HARBOR := uv run --project harbor harbor
 # Every task Dockerfile starts FROM this image; keep the tag in sync with them.
 BASE_IMAGE ?= eda-benchmark-base:latest
 TASK_PATH = tasks/$(TASK)
 
 MODEL ?= openai/gpt-5.5
 AGENT ?= opencode
-# Harbor's antigravity-cli installer fails once agy is in the base image; see harbor/eda_agents.py.
-HARBOR_AGENT = $(if $(filter antigravity-cli,$(AGENT)),eda_agents:AntigravityCli,$(AGENT))
+# Pinned agy copied out of the base image. Harbor uploads it via binary_path, because its
+# `curl install.sh | bash` installer fails (curl exit 23) once agy is already in the image.
+AGY_BINARY := harbor/.cache/agy
+AGENT_KWARGS = $(if $(filter antigravity-cli,$(AGENT)),--ak binary_path=$(AGY_BINARY))
 # Important to pass .env, otherwise agents won't be connecting to providers, and it won't be easily seen in logs.
 ENV_FILE ?= harbor/.env
 RESULTS_DIR ?= results
@@ -76,6 +77,8 @@ init:
 # Build the shared task base image (Python stack + agent CLIs). Cached, so cheap to rerun.
 base-image:
 	docker build -t $(BASE_IMAGE) harbor/base-image
+	mkdir -p $(dir $(AGY_BINARY))
+	c=$$(docker create $(BASE_IMAGE)) && docker cp -q $$c:/root/.local/bin/agy $(AGY_BINARY); rc=$$?; docker rm $$c >/dev/null; exit $$rc
 
 # Shared guard for commands that operate on a single task directory.
 require-task:
@@ -119,7 +122,7 @@ endef
 
 # Run one model/agent pair on one task.
 run: require-task require-litellm base-image
-	$(call harbor_job,run-$(TASK),-p $(TASK_PATH) -m $(MODEL) -a $(HARBOR_AGENT) -k 1 -n 1)
+	$(call harbor_job,run-$(TASK),-p $(TASK_PATH) -m $(MODEL) -a $(AGENT) -k 1 -n 1 $(AGENT_KWARGS))
 
 # Run every agent/model entry from BENCHMARK_CONFIG on one task.
 run-benchmark: require-task require-litellm base-image

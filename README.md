@@ -344,9 +344,10 @@ which under `n_concurrent_trials: 10` sometimes ran out.
 The CLI versions are pinned in two places that must agree: the `ARG`s in the base
 Dockerfile and `version` in `harbor/model-benchmark*.yaml`. With matching versions
 `codex` and `claude-code` skip installation and `opencode` reinstalls from the npm cache.
-`antigravity-cli` runs as `eda_agents:AntigravityCli` ([`harbor/eda_agents.py`](./harbor/eda_agents.py);
-`make run AGENT=antigravity-cli` maps to it), because Harbor's own installer fails when `agy`
-is already present; its auto-update is disabled in the image.
+`antigravity-cli` gets the image's `agy` through Harbor's `binary_path` option: `make base-image`
+copies it to `harbor/.cache/agy` and `make run AGENT=antigravity-cli` passes it automatically.
+Harbor's default installer (`curl install.sh | bash`) fails when `agy` is already present;
+its auto-update is disabled in the image.
 To upgrade, change both and rerun `make base-image`.
 
 ### Results viewer
