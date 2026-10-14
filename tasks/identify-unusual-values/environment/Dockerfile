@@ -1,6 +1,5 @@
-FROM python:3.11-slim
-
-RUN pip install --no-cache-dir pandas numpy scipy scikit-learn
+# Python stack and agent CLIs come from the shared base image, see harbor/base-image/Dockerfile.
+FROM eda-benchmark-base:latest
 
 WORKDIR /app
 
