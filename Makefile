@@ -75,6 +75,8 @@ init:
 	test -f $(ENV_FILE) || cp harbor/.env.template $(ENV_FILE)
 
 # Build the shared task base image (Python stack + agent CLIs). Cached, so cheap to rerun.
+# Then copy agy from the image to the host (AGY_BINARY) through a created, never started  container.
+# Harbor's binary_path needs a local file, which it uploads into every trial container.
 base-image:
 	docker build -t $(BASE_IMAGE) harbor/base-image
 	mkdir -p $(dir $(AGY_BINARY))
