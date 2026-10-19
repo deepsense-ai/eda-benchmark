@@ -32,7 +32,7 @@ This repo includes **10 publicly available synthetic data-analysis tasks** spann
 
 ---
 
-## Leaderboard (2027.07.14)
+## Leaderboard (2026.10.19)
 
 The latest benchmark results are shown below. They give a quick view of how current models compare when evaluated not only for analytical quality, but also for repeatability across runs.
 
