@@ -333,22 +333,44 @@ make run-benchmark TASK=air-quality-audit LITELLM=1
 
 ### Base image
 
-Every task image starts `FROM eda-benchmark-base:latest`, built from
-[`harbor/base-image/Dockerfile`](./harbor/base-image/Dockerfile) by `make base-image`
-(`env`, `test` and `run*` build it automatically; Docker's cache makes that cheap).
-It holds the Python data stack and the agent toolchain: Node 22 via nvm, `curl`, `ripgrep`,
-`procps`, and pinned `codex`, `claude-code`, `opencode` and `antigravity-cli`.
-Otherwise Harbor installs all of this in every trial, under a 360-second setup limit,
-which under `n_concurrent_trials: 10` sometimes ran out.
+Every task image starts `FROM eda-benchmark-base:latest`. `make base-image` builds it from
+[`harbor/base-image/Dockerfile`](./harbor/base-image/Dockerfile). 
+Make `env`, `test` and `run*` run it automatically.
 
-The CLI versions are pinned in two places that must agree: the `ARG`s in the base
-Dockerfile and `version` in `harbor/model-benchmark*.yaml`. With matching versions
-`codex` and `claude-code` skip installation and `opencode` reinstalls from the npm cache.
-`antigravity-cli` gets the image's `agy` through Harbor's `binary_path` option: `make base-image`
-copies it to `harbor/.cache/agy` and `make run AGENT=antigravity-cli` passes it automatically.
-Harbor's default installer (`curl install.sh | bash`) fails when `agy` is already present;
-its auto-update is disabled in the image.
+**Why:** without it Harbor would install the whole heavy agent toolchain in every trial. The setup
+limit is 360 seconds, and it would often run out with many concurrent trials.
+
+**What's inside:**
+- the Python data stack,
+- Node 22 (via nvm), `curl`, `ripgrep`, `procps`,
+- pinned agent CLIs: `codex`, `claude-code`, `opencode`, `antigravity-cli`.
+
+#### Pinned CLI versions
+
+Each CLI version is set in two places that must agree:
+- the `ARG`s in the base Dockerfile,
+- `version` in `harbor/model-benchmark*.yaml`.
+
 To upgrade, change both and rerun `make base-image`.
+
+With matching versions, Harbor's per-trial setup reuses what the image already has:
+
+| Agent                  | Per-trial setup                              |
+|------------------------|----------------------------------------------|
+| `codex`, `claude-code` | skips installation                           |
+| `opencode`             | reinstalls from the npm cache in the image   |
+| `antigravity-cli`      | gets `agy` uploaded from the host, see below |
+
+#### antigravity-cli
+
+Harbor's default installer (`curl install.sh | bash`) fails when `agy` is already in the
+image, so Harbor's `binary_path` option replaces it:
+
+1. `make base-image` copies `agy` out of the image to the host, as `harbor/.cache/agy`.
+2. Harbor uploads that file into every trial container. `make run AGENT=antigravity-cli`
+   and `harbor/model-benchmark*.yaml` pass `binary_path` automatically.
+
+Auto-update is disabled in the image, so every trial runs the pinned build.
 
 ### Results viewer
 
