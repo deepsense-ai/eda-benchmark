@@ -32,15 +32,15 @@ This repo includes **10 publicly available synthetic data-analysis tasks** spann
 
 ---
 
-## Leaderboard (2026.07.14)
+## Leaderboard (2027.07.14)
 
 The latest benchmark results are shown below. They give a quick view of how current models compare when evaluated not only for analytical quality, but also for repeatability across runs.
 
-![Barplot with reliability adjusted scores](./results/eda_leaderboard_ras_github_0_1.png)
+![Barplot with reliability adjusted scores](./results/eda_leaderboard_ras_github_0_2.png)
 
 
 
-![Barplot with mean scores](./results/eda_leaderboard_mean_github_0_1.png)
+![Barplot with mean scores](./results/eda_leaderboard_mean_github_0_2.png)
 
 
 Detailed trajectories, outputs, reports, and artifacts are available in the [`results`](./results) directory.
@@ -218,35 +218,28 @@ The model, agent, and reasoning-effort configuration used in the benchmark is st
 Example configuration:
 
 ```yaml
-  - model_name: anthropic/claude-fable-5
+  - model_name: claude-opus-5-5
     name: claude-code
     kwargs:
-      reasoning_effort: xhigh
+      reasoning_effort: max
 
-  - model_name: anthropic/claude-sonnet-5
-    name: claude-code
-    kwargs:
-      reasoning_effort: xhigh
-
-  - model_name: openai/gpt-5.5
+  - model_name: openai/gpt-6.1-sol
     name: codex
     kwargs:
       reasoning_effort: xhigh
 
-  - model_name: openai/gpt-5.4
+  - model_name: openai/gpt-6-sol
     name: codex
     kwargs:
       reasoning_effort: xhigh
 
-  - model_name: google/gemini-3.1-pro-preview
+  - model_name: google/gemini-3.8-flash
     name: antigravity-cli
     kwargs:
       reasoning_effort: high
 
-  - model_name: deepseek/deepseek-flash
+  - model_name: deepseek/deepseek-reasoner
     name: opencode
-
-
 ```
 
 ---
