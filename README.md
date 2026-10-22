@@ -32,15 +32,15 @@ This repo includes **10 publicly available synthetic data-analysis tasks** spann
 
 ---
 
-## Leaderboard (2026.10.19)
+## Leaderboard (2026.10.22)
 
 The latest benchmark results are shown below. They give a quick view of how current models compare when evaluated not only for analytical quality, but also for repeatability across runs.
 
-![Barplot with reliability adjusted scores](./results/eda_leaderboard_ras_github_0_2.png)
+![Barplot with reliability adjusted scores](./results/eda_leaderboard_ras_github_0_3.png)
 
 
 
-![Barplot with mean scores](./results/eda_leaderboard_mean_github_0_2.png)
+![Barplot with mean scores](./results/eda_leaderboard_mean_github_0_3.png)
 
 
 Detailed trajectories, outputs, reports, and artifacts are available in the [`results`](./results) directory.
