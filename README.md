@@ -431,7 +431,7 @@ This dataset is licensed under the [Apache License, Version 2.0](https://www.apa
 
 You may use, reproduce, modify, and distribute the dataset, including for commercial purposes, subject to the terms and conditions of the license.
 
-A copy of the license is available in the [LICENSE.md](LICENSE.md) file.
+A copy of the license is available in the [LICENSE.MD](LICENSE.MD) file.
 
 ---
 
