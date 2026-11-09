@@ -1,4 +1,4 @@
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 <div align="center">
 
@@ -427,15 +427,11 @@ To discuss a custom dataset or evaluation project, learn more here: [https://dee
 
 ## License
 
-This dataset is licensed under the [**Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License: CC BY-NC-ND 4.0**](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+This dataset is licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-You may share the dataset in its original, unmodified form, provided that proper attribution is given.
+You may use, reproduce, modify, and distribute the dataset, including for commercial purposes, subject to the terms and conditions of the license.
 
-You may not modify, transform, or build upon the dataset.
-
-Commercial use of the dataset is not permitted.
-
-For commercial licensing inquiries, get in touch here: [https://deepsense.ai/contact-us](https://deepsense.ai/contact-us/?utm_source=GitHub&utm_medium=Post_BU_Eval_11_06_26&utm_campaign=Contact)
+A copy of the license is available in the [LICENSE.md](LICENSE.md) file.
 
 ---
 
